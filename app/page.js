@@ -1,4 +1,4 @@
-import Layout from "./components/layout";
+import Layout from "../components/layout";
 import Hero from "./hero";
 import Preview from "./preview";
 import Banner from "./banner";

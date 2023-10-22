@@ -1,13 +1,40 @@
 "use client";
-import Layout from "../components/layout";
+import { useState } from "react";
+
+import Layout from "../../components/layout";
 import Hero from "./hero.js";
 import AppointmentForm from "./form1/appointment-form";
 import CredentialsForm from "./form2/credentials-form";
 import AppointmentInfo from "./form3/appointment-info";
-import { useState } from "react";
 
 export default function Home() {
+  const [appointment, setAppointment] = useState();
   const [page, setPage] = useState(0);
+  const [formData, setFormData] = useState({
+    customer_name: "",
+    customer_surname: "",
+    customer_phone: "",
+    appointment_date: "",
+    appointment_time: "",
+    barber_id: "",
+  });
+
+  async function createAppointment() {
+    try {
+      let path = "/appointments";
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }).then((response) => response.json());
+      return response;
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
   const conditionalComponent = () => {
     switch (page) {
       case 0:
@@ -19,9 +46,7 @@ export default function Home() {
           <CredentialsForm formData={formData} setFormData={setFormData} />
         );
       case 2:
-        return (
-          <AppointmentInfo formData={formData} setFormData={setFormData} />
-        );
+        return <AppointmentInfo appointment={appointment} />;
       default:
         return (
           <AppointmentForm formData={formData} setFormData={setFormData} />
@@ -29,39 +54,30 @@ export default function Home() {
     }
   };
 
-  const [formData, setFormData] = useState({
-    barber_name: "",
-    date: Date,
-    time: "",
-    name: "",
-    surname: "",
-    phone: "",
-  });
-
-  function handleSubmit() {
+  async function handleSubmit() {
     if (page === 0) {
-      if (formData.barber_name === "") {
+      if (formData.barber_id === "") {
         return alert("Please select barber");
-      } else if (formData.time === "") {
+      } else if (formData.appointment_time === "") {
         return alert("Please select time");
-      } else if (formData.date === "") {
+      } else if (formData.appointment_date === "") {
         return alert("Please select time");
       } else {
         setPage(page + 1);
-        console.log(formData);
       }
     } else if (page === 1) {
-      if (formData.name === "") {
+      if (formData.customer_name === "") {
         return alert("Lütfen isminizi girin.");
-      } else if (formData.surname === "") {
+      } else if (formData.customer_surname === "") {
         return alert("Lütfen soyadınızı girin.");
-      } else if (formData.phone.length != 10) {
+      } else if (formData.customer_phone.length != 10) {
         return alert(
           "Lütfen geçerli bir telefon numarası girin. Telefon numaranızı başına 0 koymadan girmelisiniz."
         );
       } else {
+        const deneme = await createAppointment();
+        setAppointment(deneme);
         setPage(page + 1);
-        console.log(formData);
       }
     }
   }
@@ -74,7 +90,8 @@ export default function Home() {
         {page < 2 && (
           <button
             className=" rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            onClick={handleSubmit}>
+            onClick={handleSubmit}
+          >
             {page === 0 ? "İleri" : "Onayla"}
           </button>
         )}

@@ -2,30 +2,31 @@
 
 import { useState } from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import tr from "date-fns/locale/tr";
-import format from "date-fns/format";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import tr from "dayjs/locale/tr";
+
 export default function Dates({ formData, setFormData }) {
-  const [value, setValue] = useState(Date.now());
+  const [value, setValue] = useState("");
 
   function handleChange(newValue) {
-    const date = format(newValue, "dd MMMMMMMM yyyy", { locale: tr });
-    setValue(date);
+    setValue(newValue);
+    newValue = newValue.format("YYYY-MM-DD");
     setFormData({
       ...formData,
-      date: date,
+      appointment_date: newValue,
     });
   }
   return (
     <div className="max-w-screen-lg  pb-8">
       <p className=" text-xl font-bold text-blue-900">Select a date</p>
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="tr">
         <DatePicker
+          defaultValue={value}
           label="Date picker"
           value={value}
-          onChange={handleChange}
-          renderInput={(params) => <TextField {...params} />}
+          onChange={(newValue) => handleChange(newValue)}
           className="mt-4 "
         />
       </LocalizationProvider>
